@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         APP_DIR = "${WORKSPACE}"
-        DEPLOY_BASE = "/var/www/laravel"
+        DEPLOY_BASE = "${WORKSPACE}/deploy"
         PATH = "/Users/benjamin/Library/pnpm:/Users/benjamin/.ghcup/bin:/Users/benjamin/.config/composer/vendor/bin:/usr/local/opt/openjdk/bin:/Users/benjamin/.cargo/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
     }
 
@@ -38,8 +38,7 @@ pipeline {
                     BRANCH_CLEAN=$(echo ${BRANCH_NAME} | tr '/' '_')
                     TARGET_DIR="${DEPLOY_BASE}/${BRANCH_CLEAN}"
                     mkdir -p "$TARGET_DIR"
-                    rsync -a --delete ${APP_DIR}/ "$TARGET_DIR/"
-                    chown -R www-data:www-data "$TARGET_DIR"
+                    rsync -a --delete ${WORKSPACE}/ "$TARGET_DIR/"
                 '''
             }
         }

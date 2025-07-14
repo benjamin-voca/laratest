@@ -47,7 +47,7 @@ pipeline {
             }
         }
 
-        stage('Generate NGINX Config')     stage('Generate NGINX Config') {
+    stage('Generate NGINX Config') {
         steps {
             sh("""
                 # sanitize branch name

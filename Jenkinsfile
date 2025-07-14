@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: "${env.BRANCH_NAME}", url: 'https://your-repo.git'
+                git branch: "${env.BRANCH_NAME}", url: 'https://github.com/benjamin-voca/laratest'
             }
         }
 

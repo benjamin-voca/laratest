@@ -4,6 +4,7 @@ pipeline {
     environment {
         APP_DIR = "${WORKSPACE}"
         DEPLOY_BASE = "/var/www/laravel"
+        PATH = "/Users/benjamin/Library/pnpm:/Users/benjamin/.ghcup/bin:/Users/benjamin/.config/composer/vendor/bin:/usr/local/opt/openjdk/bin:/Users/benjamin/.cargo/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
     }
 
     stages {

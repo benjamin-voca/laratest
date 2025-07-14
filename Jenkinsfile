@@ -47,19 +47,20 @@ pipeline {
             }
         }
 
-        stage('Generate NGINX Config') {
-            steps {
-                sh '''
-                    BRANCH_CLEAN=$(echo ${BRANCH_NAME} | tr '/' '_')
-                    HOST="127.0.0.1 ${BRANCH_CLEAN}.${DOMAIN}"
-                    # 1) Add /etc/hosts entry if missing
-                    if ! grep -q "${BRANCH_CLEAN}.${DOMAIN}" /etc/hosts; then
-                      echo "$HOST" | sudo tee -a /etc/hosts > /dev/null
-                    fi
+        stage('Generate NGINX Config')     stage('Generate NGINX Config') {
+        steps {
+            sh("""
+                # sanitize branch name
+                BRANCH_CLEAN=\$(echo ${BRANCH_NAME} | tr '/' '_')
 
-                    # 2) Write dynamic Nginx server block
-                    CONFIG_FILE="${NGINX_SITES}/${BRANCH_CLEAN}.conf"
-                    sudo tee "$CONFIG_FILE" > /dev/null <<EOF
+                # add hosts entry if missing
+                if ! grep -q "\${BRANCH_CLEAN}.${DOMAIN}" /etc/hosts; then
+                  echo "127.0.0.1 \${BRANCH_CLEAN}.${DOMAIN}" | sudo tee -a /etc/hosts > /dev/null
+                fi
+
+                # write nginx conf
+                CONFIG_FILE="${NGINX_SITES}/\${BRANCH_CLEAN}.conf"
+                sudo tee "\${CONFIG_FILE}" > /dev/null << 'NGINXCONF'
 server {
     listen ${PORT};
     server_name ${BRANCH_CLEAN}.${DOMAIN};
@@ -71,22 +72,26 @@ server {
         try_files \$uri \$uri/ /index.php?\$query_string;
     }
 
-    location ~ \.php\$ {
+    # this block now writes: location ~ \.php\$ {
+    location ~ \\.php\\$ {
         include fastcgi_params;
         fastcgi_pass ${PHP_FPM};
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
     }
 
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|ttf|woff|woff2|eot)\$ {
+    # and for static assets:
+    location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|ttf|woff|woff2|eot)\$ {
         access_log off;
         expires max;
     }
 }
-EOF
-                    echo "✔ Nginx config written to $CONFIG_FILE"
-                '''
-            }
+NGINXCONF
+
+                echo "✔ Generated Nginx config for branch \${BRANCH_CLEAN} at \${CONFIG_FILE}"
+            """.stripIndent())
         }
+    }
+
 
         stage('Reload NGINX') {
             steps {
